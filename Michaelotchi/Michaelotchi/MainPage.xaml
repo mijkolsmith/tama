@@ -16,7 +16,7 @@
                 HorizontalOptions="Center" />
 
             <Label
-                Text="Welcome to Michaelotchi"
+                Text="{Binding HeaderTitle, Mode=OneWay}"
                 SemanticProperties.HeadingLevel="Level1"
                 FontSize="32"
                 HorizontalOptions="Center" />
@@ -27,12 +27,42 @@
                 FontSize="18"
                 HorizontalOptions="Center" />
             <!--comment ctrl k+c-->
+
+            <Button
+                x:Name="HungerButton"
+                Text="{Binding HungerText, Mode=OneWay}"
+                Clicked="LoadHungerPage"
+                HorizontalOptions="CenterAndExpand" />
+
+            <Button
+                x:Name="ThirstButton"
+                Text="{Binding ThirstText, Mode=OneWay}"
+                Clicked="LoadThirstPage"
+                HorizontalOptions="CenterAndExpand" />
+
+            <Button
+                x:Name="HappinessButton"
+                Text="{Binding EngagementText, Mode=OneWay}"
+                Clicked="LoadEngagementPage"
+                HorizontalOptions="CenterAndExpand" />
+            
+            <Button
+                x:Name="LonelinessButton"
+                Text="{Binding LonelinessText, Mode=OneWay}"
+                Clicked=""
+                HorizontalOptions="CenterAndExpand" />
+            
+            <Button
+                x:Name="EnergyButton"
+                Text="{Binding EnergyText, Mode=OneWay}"
+                Clicked=""
+                HorizontalOptions="CenterAndExpand" />
             
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
 
                 <Button
                     x:Name="CounterBtn"
-                    Text="Click me"
+                    Text="{Binding BtnText, Mode=OneWay}"
                     Clicked="OnCounterClicked"
                     HorizontalOptions="Center" />
 
