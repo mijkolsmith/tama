@@ -54,9 +54,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="GamePage.xaml.cs">
-	    <DependentUpon>GamePage.xaml</DependentUpon>
-	  </Compile>
 	  <Compile Update="HungerPage.xaml.cs">
 	    <DependentUpon>HungerPage.xaml</DependentUpon>
 	  </Compile>
@@ -69,9 +66,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="GamePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	  <MauiXaml Update="HungerPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

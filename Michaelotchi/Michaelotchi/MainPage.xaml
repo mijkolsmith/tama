@@ -10,7 +10,7 @@
             VerticalOptions="Center">
 
             <Image
-                Source="dotnet_bot.png"
+                Source="pixelmetransparent.png"
                 SemanticProperties.Description="Cute dot net bot waving hi to you!"
                 HeightRequest="200"
                 HorizontalOptions="Center" />
@@ -49,30 +49,15 @@
             <Button
                 x:Name="LonelinessButton"
                 Text="{Binding LonelinessText, Mode=OneWay}"
-                Clicked=""
+                Clicked="DoNothing"
                 HorizontalOptions="CenterAndExpand" />
             
             <Button
                 x:Name="EnergyButton"
                 Text="{Binding EnergyText, Mode=OneWay}"
-                Clicked=""
+                Clicked="DoNothing"
                 HorizontalOptions="CenterAndExpand" />
             
-            <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
-
-                <Button
-                    x:Name="CounterBtn"
-                    Text="{Binding BtnText, Mode=OneWay}"
-                    Clicked="OnCounterClicked"
-                    HorizontalOptions="Center" />
-
-                <Button
-                    x:Name="LoadGamePageBtn"
-                    Text="Start Game"
-                    Clicked="LoadGamePage"
-                    Margin="20,0,0,0"/>
-
-            </HorizontalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 

@@ -29,6 +29,6 @@ public partial class EngagementPage : ContentPage
 
 		// Animations
 		await CounterBtn.RelRotateTo(90.0, 1000, Easing.SpringIn);
-		CounterBtn.TranslateTo(.0, -90.0, 1000);
+		CounterBtn.TranslateTo(.0, 90.0, 1000);
 	}
 }
