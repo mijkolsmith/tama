@@ -10,6 +10,8 @@
 		{
 			InitializeComponent();
 
+			DependencyService.RegisterSingleton<IDataStore<Creature>>(new CreatureDataStore());
+
 			MainPage = new AppShell();
 		}
 

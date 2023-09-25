@@ -1,81 +1,87 @@
-﻿namespace Michaelotchi
+﻿using Newtonsoft.Json;
+
+namespace Michaelotchi
 {
 	public partial class MainPage : ContentPage //,INotifyPropertyChanged
 	{
 		public string HeaderTitle { get; set; } = "Welcome to Michaelotchi";
 
-		public float hungerValue = 100; // perfect at 100, decreases slowly
+		public Creature Creature { get; set; }
+
 		public int hungerTickIntervalSeconds = 1200;
 		public float hungerTickValue = 1;
-		public string HungerText => hungerValue switch
+		public string HungerText => Creature?.hungerValue switch
 		{
-			>= 75 => "Not hungry",
-			>= 50 => "Could eat",
-			>= 25 => "Hungry",
-			>= 10 => "Extremely hungry",
-			>= 0 => "Dying of hunger",
-			_ => ""
+			>= 75 =>	"Not hungry",
+			>= 50 =>	"Could eat",
+			>= 25 =>	"Hungry",
+			>= 10 =>	"Extremely hungry",
+			>= 0 =>		"Dying of hunger",
+			_ =>		""
 		};
 
-		public float thirstValue = 100; // perfect at 100, decreases slowly
 		public int thirstTickIntervalSeconds = 1000;
 		public float thirstTickValue = 1;
-		public string ThirstText => thirstValue switch
+		public string ThirstText => Creature?.thirstValue switch
 		{
-			>= 75 => "Not thirsty",
-			>= 50 => "Could drink",
-			>= 25 => "Thirsty",
-			>= 10 => "Extremely thirsty",
-			>= 0 => "Dying of thirst",
-			_ => ""
+			>= 75 =>	"Not thirsty",
+			>= 50 =>	"Could drink",
+			>= 25 =>	"Thirsty",
+			>= 10 =>	"Extremely thirsty",
+			>= 0 =>		"Dying of thirst",
+			_ =>		""
 		};
 
-		public float engagementValue = 50; // perfect at 50, decreases very slowly
 		public int engagementTickIntervalSeconds = 2500;
 		public float engagementTickValue = 1;
-		public string EngagementText => engagementValue switch
+		public string EngagementText => Creature?.engagementValue switch
 		{
-			>= 90 => "Overstimulated",
-			>= 75 => "Extremely happy",
-			>= 50 => "Happy",
-			>= 25 => "Bored",
-			>= 10 => "Extremely bored",
-			>= 0 => "Bored to death",
-			_ => ""
+			>= 90 =>	"Overstimulated",
+			>= 75 =>	"Extremely happy",
+			>= 50 =>	 "Happy",
+			>= 25 =>	"Bored",
+			>= 10 =>	"Extremely bored",
+			>= 0 =>		"Bored to death",
+			_ =>		""
 		};
 
-		public float lonelinessValue = 0; // perfect at 0, increases very slowly
-		public int lonelinessTickIntervalSeconds = 2000;
+		public int lonelinessTickIntervalSeconds = 1500;
 		public float lonelinessTickValue = 1;
-		public string LonelinessText => lonelinessValue switch
+		public string LonelinessText => Creature?.lonelinessValue switch
 		{
-			>= 90 => "Feeling abandoned",
-			>= 75 => "Extremely lonely",
-			>= 50 => "Lonely",
-			>= 25 => "Happy",
-			>= 0 => "Loved",
-			_ => ""
+			>= 90 =>	"Feeling abandoned",
+			>= 75 =>	"Extremely lonely",
+			>= 50 =>	"Lonely",
+			>= 25 =>	"Happy",
+			>= 0 =>		"Loved",
+			_ =>		""
 		};
-
-		public float energyValue = 100; // perfect at 100, increases slowly
 		public int energyTickIntervalSeconds = 500;
 		public float energyTickValue = 1;
-		public string EnergyText => energyValue switch
+		public string EnergyText => Creature?.energyValue switch
 		{
-			>= 75 => "Energized",
-			>= 50 => "Rested",
-			>= 25 => "Tired",
-			>= 10 => "Extremely tired",
-			>= 0 => "Sleeping",
-			_ => ""
+			>= 75 =>	"Energized",
+			>= 50 =>	"Rested",
+			>= 25 =>	"Tired",
+			>= 10 =>	"Extremely tired",
+			>= 0 =>		"Sleeping",
+			_ =>		""
 		};
-
+		
 		public MainPage()
 		{
 			BindingContext = this;
 
 			InitializeComponent();
 
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			Creature = creatureDataStore.ReadItem();
+
+			if (Creature == null)
+			{
+				Navigation.PushAsync(new NewCreaturePage());
+			}
+			#region Start Timers
 			//Hunger timer
 			System.Timers.Timer hungerTimer = new System.Timers.Timer()
 			{
@@ -120,42 +126,60 @@
 			};
 			energyTimer.Elapsed += ThirstTick;
 			energyTimer.Start();
+			#endregion
 		}
-
+		
+		#region Tick Methods
 		public void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (hungerValue > 0) hungerValue -= hungerTickValue;
+			if (Creature.hungerValue > 0) Creature.hungerValue -= hungerTickValue;
+			hungerTickValue = 1;
 
-			if (hungerValue < 0)
-			{ 
-				//Die
+			if (Creature.hungerValue < 0)
+			{
+				Die();
 			}
 		}
 
 		public void ThirstTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (thirstValue > 0) thirstValue -= thirstTickValue;
+			if (Creature.thirstValue > 0) Creature.thirstValue -= thirstTickValue;
+			thirstTickValue = 1;
 
-			if (thirstValue < 0)
+			if (Creature.thirstValue < 0)
 			{
-				//Die
+				Die();
 			}
 		}
 
 		public void EngagementTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
+			if (Creature.engagementValue > 0) Creature.engagementValue -= engagementTickValue;
 
+			if (Creature.engagementValue < 20 || Creature.engagementValue > 80)
+			{
+				energyTickValue *= .5f;
+				thirstTickValue *= 2f;
+				hungerTickValue *= 2f;
+			}
 		}
 
 		public void LonelinessTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
+			if (Creature.lonelinessValue < 100) Creature.lonelinessValue += lonelinessTickValue;
 
+			if (Creature.lonelinessValue > 50)
+			{
+				thirstTickValue *= 2f;
+				hungerTickValue *= 2f;
+			}
 		}
 
 		public void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-
+			if (Creature.energyValue < 100) Creature.energyValue = MathF.Min(Creature.energyValue + energyTickValue, 100);
 		}
+		#endregion
 
 		private void LoadHungerPage(object sender, EventArgs e)
 		{
@@ -172,6 +196,14 @@
 			Navigation.PushAsync(new EngagementPage());
 		}
 
+		private void Die()
+		{
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			creatureDataStore.DeleteItem(Creature);
+			Navigation.PushAsync(new NewCreaturePage());
+		}
+
+		// Temp to bind to temp buttons
 		private void DoNothing(object sender, EventArgs e) { }
 	}
 }
