@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Michaelotchi
 {
@@ -58,7 +59,7 @@ namespace Michaelotchi
 		};
 		public int energyTickIntervalSeconds = 500;
 		public float energyTickValue = 1;
-		public string EnergyText => Creature?.Energy switch
+		public string EnergyText => Creature?.Tired switch
 		{
 			>= 75 =>	"Energized",
 			>= 50 =>	"Rested",
@@ -74,23 +75,14 @@ namespace Michaelotchi
 
 			InitializeComponent();
 
-			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			LoadCreatureAtStartup();
+		}
 
-			int creatureId = Preferences.Get("creatureId", 0);
-
-			if (creatureId == 0)
-			{
+		public async void LoadCreatureAtStartup()
+		{
+			if (!await TryLoadCreature()) 
 				LoadNewCreaturePage();
-			}
-			else
-			{
-				Creature = creatureDataStore.ReadItem(creatureId).Result;
-				if (Creature == null)
-				{
-					LoadNewCreaturePage();
-				}
-			}
-			
+
 			#region Start Timers
 			//Hunger timer
 			System.Timers.Timer hungerTimer = new System.Timers.Timer()
@@ -127,7 +119,7 @@ namespace Michaelotchi
 			};
 			lonelinessTimer.Elapsed += ThirstTick;
 			lonelinessTimer.Start();
-			
+
 			//Energy timer
 			System.Timers.Timer energyTimer = new System.Timers.Timer()
 			{
@@ -138,10 +130,15 @@ namespace Michaelotchi
 			energyTimer.Start();
 			#endregion
 		}
-		
+
 		#region Tick Methods
 		public void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
+			if (Creature == null)
+			{ 
+				TryLoadCreature(); 
+			}
+
 			if (Creature.Hunger > 0) Creature.Hunger -= hungerTickValue;
 			hungerTickValue = 1;
 
@@ -187,7 +184,7 @@ namespace Michaelotchi
 
 		public void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.Energy < 100) Creature.Energy = MathF.Min(Creature.Energy + energyTickValue, 100);
+			if (Creature.Tired < 100) Creature.Tired = MathF.Min(Creature.Tired + energyTickValue, 100);
 		}
 		#endregion
 		
@@ -198,27 +195,48 @@ namespace Michaelotchi
 
 		private void LoadHungerPage(object sender, EventArgs e)
 		{
-			Navigation.PushAsync(new HungerPage());
+			Navigation.PushAsync(new HungerPage(Creature));
 		}
 
 		private void LoadThirstPage(object sender, EventArgs e)
 		{
-			Navigation.PushAsync(new ThirstPage());
+			Navigation.PushAsync(new ThirstPage(Creature));
 		}
 
 		private void LoadEngagementPage(object sender, EventArgs e)
 		{
-			Navigation.PushAsync(new EngagementPage());
+			Navigation.PushAsync(new EngagementPage(Creature));
 		}
 
-		private void Die()
+		private async void Die()
 		{
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-			creatureDataStore.DeleteItem(Creature);
-			Navigation.PushAsync(new NewCreaturePage());
+			await creatureDataStore.DeleteItem(Creature);
+			await Navigation.PushAsync(new NewCreaturePage());
 		}
 
-		// Temp to bind to temp buttons
+		private async Task<bool> TryLoadCreature() 
+		{
+			//Preferences.Clear();
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			int creatureId = Preferences.Get("creatureId", 0);
+
+			if (creatureId == 0)
+			{
+				return false;
+			}
+			else
+			{
+				Creature = await creatureDataStore.ReadItem(creatureId);
+				if (Creature == null)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		private void DoNothing(object sender, EventArgs e) { }
 	}
 }

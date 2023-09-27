@@ -5,15 +5,22 @@
              Title="EngagementPage">
     <VerticalStackLayout>
         <Label 
-            Text="Welcome to .NET MAUI!"
+            Text="Play juffen with Michael?"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-        
-        <Button
-            x:Name="CounterBtn"
-            Text="{Binding BtnText, Mode=OneWay}"
-            Clicked="OnCounterClicked"
-            HorizontalOptions="Center" />
-        
+
+        <HorizontalStackLayout>
+            <Button
+                x:Name="CounterButton"
+                Text="{Binding ButtonText, Mode=OneWay}"
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="JufButton"
+                Text="{Binding ButtonText, Mode=OneWay}"
+                Clicked="OnJufClicked"
+                HorizontalOptions="Center" />
+        </HorizontalStackLayout>
     </VerticalStackLayout>
 </ContentPage>

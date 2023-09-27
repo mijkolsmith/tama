@@ -5,8 +5,14 @@
              Title="ThirstPage">
     <VerticalStackLayout>
         <Label 
-            Text="Welcome to .NET MAUI!"
+            Text="Give Michael some water?"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+
+        <Button
+            x:Name="WaterCreatureButton"
+            Text="Give Creature Water"
+            Clicked="WaterCreature"
+            HorizontalOptions="CenterAndExpand" />
     </VerticalStackLayout>
 </ContentPage>

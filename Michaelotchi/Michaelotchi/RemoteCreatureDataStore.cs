@@ -5,7 +5,7 @@ namespace Michaelotchi
 {
 	public class RemoteCreatureDataStore : IDataStore<Creature>
 	{
-		private HttpClient httpClient = new HttpClient();
+		private HttpClient httpClient = new();
 		public async Task<bool> CreateItem(Creature item)
 		{
 			string creatureString = JsonConvert.SerializeObject(item);
@@ -21,7 +21,7 @@ namespace Michaelotchi
 				Preferences.Set("creatureId", creature.Id);
 				return true;
 			}
-			return false;
+			else return false;
 		}
 
 		public async Task<Creature> ReadItem(int id)

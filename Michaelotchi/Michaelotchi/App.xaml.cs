@@ -12,7 +12,7 @@
 
 			DependencyService.RegisterSingleton<IDataStore<Creature>>(new RemoteCreatureDataStore());
 
-			MainPage = new AppShell();
+            MainPage = new AppShell();
 		}
 
 		protected override void OnSleep()

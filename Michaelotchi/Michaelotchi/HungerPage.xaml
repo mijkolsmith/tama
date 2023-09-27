@@ -5,8 +5,14 @@
              Title="HungerPage">
     <VerticalStackLayout>
         <Label 
-            Text="Welcome to .NET MAUI!"
+            Text="Feed Michael?"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+
+        <Button
+            x:Name="FeedCreatureButton"
+            Text="Feed Creature"
+            Clicked="FeedCreature"
+            HorizontalOptions="CenterAndExpand" />
     </VerticalStackLayout>
 </ContentPage>

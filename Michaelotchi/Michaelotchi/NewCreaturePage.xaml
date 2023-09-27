@@ -13,12 +13,12 @@
         <Entry
             x:Name="UserNameEntry"
             Placeholder="Enter Owner Name"
-            Completed="OnUserNameEntryCompleted" />
+            TextChanged="OnUserNameEntryTextChanged"/>
 
         <Entry
             x:Name="NameEntry"
             Placeholder="Enter Name"
-            Completed="OnNameEntryCompleted" />
+            TextChanged="OnNameEntryTextChanged" />
 
         <Button
             x:Name="NewCreatureButton"

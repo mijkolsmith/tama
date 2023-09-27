@@ -30,33 +30,36 @@ namespace Michaelotchi
 			creatureCount = Preferences.Get("creatureCount", 0);
 		}
 
-		private void OnUserNameEntryCompleted(object sender, EventArgs e)
+		private void OnUserNameEntryTextChanged(object sender, TextChangedEventArgs e)
 		{
-			UserName = ((Entry)sender).Text;
+			UserName = e.NewTextValue;
 		}
 
-		private void OnNameEntryCompleted(object sender, EventArgs e)
+		private void OnNameEntryTextChanged(object sender, TextChangedEventArgs e)
 		{
-			Name = ((Entry)sender).Text;
+			Name = e.NewTextValue;
 		}
 
-		public void NewCreature(object sender, EventArgs e)
+		public async void NewCreature(object sender, EventArgs e)
 		{
 			creatureCount++;
 
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
 
-			creatureDataStore.CreateItem(
-				new Creature(	Name,
-								UserName,
-								defaultHungerValue,
-								defaultThirstValue,
-								defaultEngagementValue,
-								defaultLonelinessValue,
-								defaultEnergyValue,
-								creatureCount));
-
-			CreatureCreatedText = "Creature succesfully created!";
+			if (await creatureDataStore.CreateItem(new Creature(
+					Name,
+					UserName,
+					defaultHungerValue,
+					defaultThirstValue,
+					defaultEngagementValue,
+					defaultLonelinessValue,
+					defaultEnergyValue,
+					creatureCount)))
+			{
+				int id = Preferences.Get("creatureId", 0);
+				CreatureCreatedText = $"Creature succesfully created with id: {id}";
+			}
+			else CreatureCreatedText = "error occured";
 		}
 	}
 }
