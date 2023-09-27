@@ -5,16 +5,21 @@
              Title="NewCreature">
     <VerticalStackLayout>
         <Label
-            Text="What should your {Binding CreatureCount, Mode=OneWay} creature be called?"
+            Text="{Binding CreatureCountText, Mode=OneWay}"
             SemanticProperties.HeadingLevel="Level2"
             FontSize="18"
             HorizontalOptions="Center" />
-        
+
         <Entry
-            x:Name="entry"
+            x:Name="UserNameEntry"
+            Placeholder="Enter Owner Name"
+            Completed="OnUserNameEntryCompleted" />
+
+        <Entry
+            x:Name="NameEntry"
             Placeholder="Enter Name"
-            Completed="OnEntryCompleted" />
-        
+            Completed="OnNameEntryCompleted" />
+
         <Button
             x:Name="NewCreatureButton"
             Text="Create New Creature"

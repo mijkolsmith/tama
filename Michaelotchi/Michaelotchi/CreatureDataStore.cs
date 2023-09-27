@@ -6,26 +6,26 @@ namespace Michaelotchi
 	{
 		private readonly string preferencesTag = "Creature";
 
-		public bool CreateItem(Creature item)
+		public Task<bool> CreateItem(Creature item)
 		{
 			if (Preferences.ContainsKey(preferencesTag))
 			{
-				return false;
+				return Task.FromResult(false);
 			}
 
 			string creatureString = JsonConvert.SerializeObject(item);
 			Preferences.Set(preferencesTag, creatureString);
 
-			return Preferences.ContainsKey(preferencesTag);
+			return Task.FromResult(Preferences.ContainsKey(preferencesTag));
 		}
 
-		public Creature ReadItem()
+		public Task<Creature> ReadItem(int id)
 		{
 			string creatureString = Preferences.Get(preferencesTag, "");
-			return JsonConvert.DeserializeObject<Creature>(creatureString);
+			return Task.FromResult(JsonConvert.DeserializeObject<Creature>(creatureString));
 		}
 
-		public bool UpdateItem(Creature item)
+		public Task<bool> UpdateItem(Creature item)
 		{
 			if (Preferences.ContainsKey(preferencesTag))
 			{
@@ -35,13 +35,13 @@ namespace Michaelotchi
 			string creatureString = JsonConvert.SerializeObject(item);
 			Preferences.Set(preferencesTag, creatureString);
 
-			return Preferences.ContainsKey(preferencesTag);
+			return Task.FromResult(Preferences.ContainsKey(preferencesTag));
 		}
 
-		public bool DeleteItem(Creature item)
+		public Task<bool> DeleteItem(Creature item)
 		{
 			Preferences.Remove(preferencesTag);
-			return !Preferences.ContainsKey(preferencesTag);
+			return Task.FromResult(!Preferences.ContainsKey(preferencesTag));
 		}
 	}
 }

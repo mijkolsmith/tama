@@ -10,7 +10,7 @@
 		{
 			InitializeComponent();
 
-			DependencyService.RegisterSingleton<IDataStore<Creature>>(new CreatureDataStore());
+			DependencyService.RegisterSingleton<IDataStore<Creature>>(new RemoteCreatureDataStore());
 
 			MainPage = new AppShell();
 		}

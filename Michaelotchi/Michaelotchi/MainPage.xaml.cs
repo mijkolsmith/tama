@@ -10,7 +10,7 @@ namespace Michaelotchi
 
 		public int hungerTickIntervalSeconds = 1200;
 		public float hungerTickValue = 1;
-		public string HungerText => Creature?.hungerValue switch
+		public string HungerText => Creature?.Hunger switch
 		{
 			>= 75 =>	"Not hungry",
 			>= 50 =>	"Could eat",
@@ -22,7 +22,7 @@ namespace Michaelotchi
 
 		public int thirstTickIntervalSeconds = 1000;
 		public float thirstTickValue = 1;
-		public string ThirstText => Creature?.thirstValue switch
+		public string ThirstText => Creature?.Thirst switch
 		{
 			>= 75 =>	"Not thirsty",
 			>= 50 =>	"Could drink",
@@ -34,7 +34,7 @@ namespace Michaelotchi
 
 		public int engagementTickIntervalSeconds = 2500;
 		public float engagementTickValue = 1;
-		public string EngagementText => Creature?.engagementValue switch
+		public string EngagementText => Creature?.Boredom switch
 		{
 			>= 90 =>	"Overstimulated",
 			>= 75 =>	"Extremely happy",
@@ -47,7 +47,7 @@ namespace Michaelotchi
 
 		public int lonelinessTickIntervalSeconds = 1500;
 		public float lonelinessTickValue = 1;
-		public string LonelinessText => Creature?.lonelinessValue switch
+		public string LonelinessText => Creature?.Loneliness switch
 		{
 			>= 90 =>	"Feeling abandoned",
 			>= 75 =>	"Extremely lonely",
@@ -58,7 +58,7 @@ namespace Michaelotchi
 		};
 		public int energyTickIntervalSeconds = 500;
 		public float energyTickValue = 1;
-		public string EnergyText => Creature?.energyValue switch
+		public string EnergyText => Creature?.Energy switch
 		{
 			>= 75 =>	"Energized",
 			>= 50 =>	"Rested",
@@ -75,12 +75,22 @@ namespace Michaelotchi
 			InitializeComponent();
 
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-			Creature = creatureDataStore.ReadItem();
 
-			if (Creature == null)
+			int creatureId = Preferences.Get("creatureId", 0);
+
+			if (creatureId == 0)
 			{
-				Navigation.PushAsync(new NewCreaturePage());
+				LoadNewCreaturePage();
 			}
+			else
+			{
+				Creature = creatureDataStore.ReadItem(creatureId).Result;
+				if (Creature == null)
+				{
+					LoadNewCreaturePage();
+				}
+			}
+			
 			#region Start Timers
 			//Hunger timer
 			System.Timers.Timer hungerTimer = new System.Timers.Timer()
@@ -132,10 +142,10 @@ namespace Michaelotchi
 		#region Tick Methods
 		public void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.hungerValue > 0) Creature.hungerValue -= hungerTickValue;
+			if (Creature.Hunger > 0) Creature.Hunger -= hungerTickValue;
 			hungerTickValue = 1;
 
-			if (Creature.hungerValue < 0)
+			if (Creature.Hunger < 0)
 			{
 				Die();
 			}
@@ -143,10 +153,10 @@ namespace Michaelotchi
 
 		public void ThirstTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.thirstValue > 0) Creature.thirstValue -= thirstTickValue;
+			if (Creature.Thirst > 0) Creature.Thirst -= thirstTickValue;
 			thirstTickValue = 1;
 
-			if (Creature.thirstValue < 0)
+			if (Creature.Thirst < 0)
 			{
 				Die();
 			}
@@ -154,9 +164,9 @@ namespace Michaelotchi
 
 		public void EngagementTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.engagementValue > 0) Creature.engagementValue -= engagementTickValue;
+			if (Creature.Engagement > 0) Creature.Engagement -= engagementTickValue;
 
-			if (Creature.engagementValue < 20 || Creature.engagementValue > 80)
+			if (Creature.Engagement < 20 || Creature.Engagement > 80)
 			{
 				energyTickValue *= .5f;
 				thirstTickValue *= 2f;
@@ -166,9 +176,9 @@ namespace Michaelotchi
 
 		public void LonelinessTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.lonelinessValue < 100) Creature.lonelinessValue += lonelinessTickValue;
+			if (Creature.Loneliness < 100) Creature.Loneliness += lonelinessTickValue;
 
-			if (Creature.lonelinessValue > 50)
+			if (Creature.Loneliness > 50)
 			{
 				thirstTickValue *= 2f;
 				hungerTickValue *= 2f;
@@ -177,9 +187,14 @@ namespace Michaelotchi
 
 		public void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.energyValue < 100) Creature.energyValue = MathF.Min(Creature.energyValue + energyTickValue, 100);
+			if (Creature.Energy < 100) Creature.Energy = MathF.Min(Creature.Energy + energyTickValue, 100);
 		}
 		#endregion
+		
+		private void LoadNewCreaturePage()
+		{
+			Navigation.PushAsync(new NewCreaturePage());
+		}
 
 		private void LoadHungerPage(object sender, EventArgs e)
 		{

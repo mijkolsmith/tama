@@ -8,6 +8,7 @@ namespace Michaelotchi
 		private const float defaultLonelinessValue = 0f;
 		private const float defaultEnergyValue = 100f;
 
+		public string CreatureCountText { get => "What should your " + CreatureCount + "creature be called?"; }
 		private int creatureCount = 0;
 		public string CreatureCount => creatureCount + creatureCount switch
 		{
@@ -18,7 +19,8 @@ namespace Michaelotchi
 			_ => ""
 		};
 
-		private string name;
+		private string Name { get; set; }
+		private string UserName { get; set; }
 		public string CreatureCreatedText { get; set; } = "";
 
 		public NewCreaturePage()
@@ -28,19 +30,25 @@ namespace Michaelotchi
 			creatureCount = Preferences.Get("creatureCount", 0);
 		}
 
-		private void OnEntryCompleted(object sender, EventArgs e)
+		private void OnUserNameEntryCompleted(object sender, EventArgs e)
 		{
-			name = ((Entry)sender).Text;
+			UserName = ((Entry)sender).Text;
+		}
+
+		private void OnNameEntryCompleted(object sender, EventArgs e)
+		{
+			Name = ((Entry)sender).Text;
 		}
 
 		public void NewCreature(object sender, EventArgs e)
 		{
 			creatureCount++;
 
-			IDataStore <Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
 
 			creatureDataStore.CreateItem(
-				new Creature(	name,
+				new Creature(	Name,
+								UserName,
 								defaultHungerValue,
 								defaultThirstValue,
 								defaultEngagementValue,
