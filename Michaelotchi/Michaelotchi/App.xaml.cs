@@ -17,20 +17,24 @@
 
 		protected override void OnSleep()
 		{
-			base.OnSleep();
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
 
 			sleepTime = DateTime.Now;
 			Preferences.Set(nameof(sleepTime), sleepTime);
+
+			base.OnSleep();
 		}
 
 		protected override void OnResume()
 		{
-			base.OnResume();
-
 			wakeTime = DateTime.Now;
 			sleepTime = Preferences.Get(nameof(sleepTime), wakeTime);
 
 			elapsedTime = wakeTime - sleepTime;
+
+			Preferences.Set("elapsedTime", elapsedTime.Seconds);
+
+			base.OnResume();
 		}
 	}
 }

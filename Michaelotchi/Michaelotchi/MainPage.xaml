@@ -30,31 +30,41 @@
             <Button
                 x:Name="HungerButton"
                 Text="{Binding HungerText, Mode=OneWay}"
+                BackgroundColor="{Binding HungerColor ,Mode=OneWay}"
                 Clicked="LoadHungerPage"
+                WidthRequest="400"
                 HorizontalOptions="CenterAndExpand" />
 
             <Button
                 x:Name="ThirstButton"
                 Text="{Binding ThirstText, Mode=OneWay}"
+                BackgroundColor="{Binding ThirstColor ,Mode=OneWay}"
                 Clicked="LoadThirstPage"
+                WidthRequest="400"
                 HorizontalOptions="CenterAndExpand" />
 
             <Button
-                x:Name="HappinessButton"
+                x:Name="EngagementButton"
                 Text="{Binding EngagementText, Mode=OneWay}"
+                BackgroundColor="{Binding EngagementColor ,Mode=OneWay}"
                 Clicked="LoadEngagementPage"
+                WidthRequest="400"
                 HorizontalOptions="CenterAndExpand" />
             
             <Button
                 x:Name="LonelinessButton"
                 Text="{Binding LonelinessText, Mode=OneWay}"
+                BackgroundColor="{Binding LonelinessColor ,Mode=OneWay}"
                 Clicked="DoNothing"
+                WidthRequest="400"
                 HorizontalOptions="CenterAndExpand" />
             
             <Button
                 x:Name="EnergyButton"
                 Text="{Binding EnergyText, Mode=OneWay}"
+                BackgroundColor="{Binding EnergyColor ,Mode=OneWay}"
                 Clicked="DoNothing"
+                WidthRequest="400"
                 HorizontalOptions="CenterAndExpand" />
             
         </VerticalStackLayout>

@@ -2,14 +2,16 @@ namespace Michaelotchi;
 
 public partial class EngagementPage : ContentPage
 {
-	public string ButtonText { get; set; } = "Click Here";
+	public string CountText { get; set; } = "\n";
 	int count;
+	Creature Creature { get; set; }
 
 	public EngagementPage(Creature creature)
 	{
 		BindingContext = this;
 
 		InitializeComponent();
+		Creature = creature;
 	}
 
 	public void OnCounterClicked(object sender, EventArgs e)
@@ -17,22 +19,25 @@ public partial class EngagementPage : ContentPage
 		if (Count(false))
 		{
 			string displayText = $"Clicked {count} time";
-			displayText += count == 1 ? "" : "s";
-
-			ButtonText = displayText;
+			displayText += (count == 1 ? "" : "s") + "\n";
+			CountText = displayText;
 		}
 		else ResetCount();
-
-		// Animations
-		//await CounterBtn.RelRotateTo(90.0, 1000, Easing.SpringIn);
-		//CounterBtn.TranslateTo(.0, 90.0, 1000);
 	}
 
 	public void OnJufClicked(object sender, EventArgs e)
 	{
 		if (Count(true))
 		{
-			ButtonText = "juf";
+			if (Creature.Tired > 10)
+			{
+				CountText = "Juf! Michael liked that. \n";
+				Creature.Engagement += 1;
+
+				IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+				creatureDataStore.UpdateItem(Creature);
+			}
+			else CountText = "Juf!";
 		}
 		else ResetCount();
 	}
@@ -49,6 +54,16 @@ public partial class EngagementPage : ContentPage
 
 	public void ResetCount()
 	{
+		if (Creature.Tired > 0)
+		{
+			Creature.Tired -= 5;
+
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			creatureDataStore.UpdateItem(Creature);
+		}
+
+		CountText = "WRONG! \n";
 		count = 0;
+
 	}
 }

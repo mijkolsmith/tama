@@ -1,17 +1,14 @@
-﻿using Newtonsoft.Json;
-using System.Security.Cryptography.X509Certificates;
-
-namespace Michaelotchi
+﻿namespace Michaelotchi
 {
-	public partial class MainPage : ContentPage //,INotifyPropertyChanged
+	public partial class MainPage : ContentPage
 	{
 		public string HeaderTitle { get; set; } = "Welcome to Michaelotchi";
-
+		public bool displayDebugStats = true;
 		public Creature Creature { get; set; }
 
 		public int hungerTickIntervalSeconds = 1200;
 		public float hungerTickValue = 1;
-		public string HungerText => Creature?.Hunger switch
+		public string HungerText => "Hunger: " + (displayDebugStats ? Creature?.Hunger : Creature?.Hunger switch
 		{
 			>= 75 =>	"Not hungry",
 			>= 50 =>	"Could eat",
@@ -19,11 +16,21 @@ namespace Michaelotchi
 			>= 10 =>	"Extremely hungry",
 			>= 0 =>		"Dying of hunger",
 			_ =>		""
+		});
+		public Color HungerColor => Creature?.Hunger switch
+		{
+			>= 75 =>	Colors.Green,
+			>= 50 =>	Colors.LightGreen,
+			>= 25 =>	Colors.Orange,
+			>= 10 =>	Colors.Yellow,
+			>= 0 =>		Colors.Red,
+			_ =>		Colors.White
 		};
 
 		public int thirstTickIntervalSeconds = 1000;
 		public float thirstTickValue = 1;
-		public string ThirstText => Creature?.Thirst switch
+		public string ThirstText => "Thirst: " + 
+			(displayDebugStats ? Creature?.Thirst : Creature?.Thirst switch
 		{
 			>= 75 =>	"Not thirsty",
 			>= 50 =>	"Could drink",
@@ -31,24 +38,46 @@ namespace Michaelotchi
 			>= 10 =>	"Extremely thirsty",
 			>= 0 =>		"Dying of thirst",
 			_ =>		""
+		});
+		public Color ThirstColor => Creature?.Thirst switch
+		{
+			>= 75 =>	Colors.Green,
+			>= 50 =>	Colors.LightGreen,
+			>= 25 =>	Colors.Orange,
+			>= 10 =>	Colors.Yellow,
+			>= 0 =>		Colors.Red,
+			_ =>		Colors.White
 		};
 
 		public int engagementTickIntervalSeconds = 2500;
 		public float engagementTickValue = 1;
-		public string EngagementText => Creature?.Boredom switch
+		public string EngagementText => "Happiness: " + 
+			(displayDebugStats ? Creature?.Engagement : Creature?.Engagement switch
 		{
 			>= 90 =>	"Overstimulated",
 			>= 75 =>	"Extremely happy",
-			>= 50 =>	 "Happy",
+			>= 50 =>	"Happy",
 			>= 25 =>	"Bored",
 			>= 10 =>	"Extremely bored",
 			>= 0 =>		"Bored to death",
 			_ =>		""
+		});
+		public Color EngagementColor => Creature?.Engagement switch
+		{
+			>= 90 =>	Colors.Red,
+			>= 75 =>	Colors.Orange,
+			>= 60 =>	Colors.LightGreen,
+			>= 40 =>	Colors.Green,
+			>= 25 =>	Colors.LightGreen,
+			>= 10 =>	Colors.Orange,
+			>= 0 =>		Colors.Red,
+			_ =>		Colors.White
 		};
 
 		public int lonelinessTickIntervalSeconds = 1500;
 		public float lonelinessTickValue = 1;
-		public string LonelinessText => Creature?.Loneliness switch
+		public string LonelinessText => "Loneliness: " + 
+			(displayDebugStats ? Creature?.Loneliness : Creature?.Loneliness switch
 		{
 			>= 90 =>	"Feeling abandoned",
 			>= 75 =>	"Extremely lonely",
@@ -56,10 +85,21 @@ namespace Michaelotchi
 			>= 25 =>	"Happy",
 			>= 0 =>		"Loved",
 			_ =>		""
+		});
+		public Color LonelinessColor => Creature?.Loneliness switch
+		{
+			>= 90 =>	Colors.Red,
+			>= 75 =>	Colors.Yellow,
+			>= 50 =>	Colors.Orange,
+			>= 25 =>	Colors.LightGreen,
+			>= 0 =>		Colors.Green,
+			_ =>		Colors.White
 		};
+
 		public int energyTickIntervalSeconds = 500;
 		public float energyTickValue = 1;
-		public string EnergyText => Creature?.Tired switch
+		public string EnergyText => "Energy: " + 
+			(displayDebugStats ? Creature?.Tired : Creature?.Tired switch
 		{
 			>= 75 =>	"Energized",
 			>= 50 =>	"Rested",
@@ -67,8 +107,17 @@ namespace Michaelotchi
 			>= 10 =>	"Extremely tired",
 			>= 0 =>		"Sleeping",
 			_ =>		""
+		});
+		public Color EnergyColor => Creature?.Tired switch
+		{
+			>= 75 => Colors.Green,
+			>= 50 => Colors.LightGreen,
+			>= 25 => Colors.Orange,
+			>= 10 => Colors.Yellow,
+			>= 0 => Colors.Red,
+			_ => Colors.White
 		};
-		
+
 		public MainPage()
 		{
 			BindingContext = this;
@@ -80,9 +129,31 @@ namespace Michaelotchi
 
 		public async void LoadCreatureAtStartup()
 		{
+			// Try and get the creature, if it's still alive
 			if (!await TryLoadCreature()) 
 				LoadNewCreaturePage();
 
+			// Update creature according to elapsed time outside app
+			float elapsedSeconds = Preferences.Get("elapsedTime", 0);
+			if (elapsedSeconds != 0)
+			{
+				for (int hungerTicks = (int)MathF.Floor(elapsedSeconds / hungerTickIntervalSeconds); hungerTicks > 0; hungerTicks--)
+					HungerTick(null, null);
+
+				for (int thirstTicks = (int)MathF.Floor(elapsedSeconds / thirstTickIntervalSeconds); thirstTicks > 0; thirstTicks--)
+					ThirstTick(null, null);
+
+				for (int engagementTicks = (int)MathF.Floor(elapsedSeconds / engagementTickIntervalSeconds); engagementTicks > 0; engagementTicks--)
+					EngagementTick(null, null);
+
+				for (int lonelinessTicks = (int)MathF.Floor(elapsedSeconds / lonelinessTickIntervalSeconds); lonelinessTicks > 0; lonelinessTicks--)
+					LonelinessTick(null, null);
+
+				for (int energyTicks = (int)MathF.Floor(elapsedSeconds / energyTickIntervalSeconds); energyTicks > 0; energyTicks--)
+					EnergyTick(null, null);
+			}
+
+			// Start the in-app timers
 			#region Start Timers
 			//Hunger timer
 			System.Timers.Timer hungerTimer = new System.Timers.Timer()
@@ -132,36 +203,41 @@ namespace Michaelotchi
 		}
 
 		#region Tick Methods
-		public void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
+		public async void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			if (Creature == null)
-			{ 
-				TryLoadCreature(); 
-			}
+				await TryLoadCreature();
 
-			if (Creature.Hunger > 0) Creature.Hunger -= hungerTickValue;
+			if (Creature.Hunger > 0) 
+				Creature.Hunger -= hungerTickValue;
+			
 			hungerTickValue = 1;
 
-			if (Creature.Hunger < 0)
-			{
+			if (Creature.Hunger <= 0)
 				Die();
-			}
 		}
 
-		public void ThirstTick(object sender, System.Timers.ElapsedEventArgs e)
+		public async void ThirstTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.Thirst > 0) Creature.Thirst -= thirstTickValue;
+			if (Creature == null)
+				await TryLoadCreature();
+
+			if (Creature.Thirst > 0) 
+				Creature.Thirst -= thirstTickValue;
+			
 			thirstTickValue = 1;
 
-			if (Creature.Thirst < 0)
-			{
+			if (Creature.Thirst <= 0)
 				Die();
-			}
 		}
 
-		public void EngagementTick(object sender, System.Timers.ElapsedEventArgs e)
+		public async void EngagementTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.Engagement > 0) Creature.Engagement -= engagementTickValue;
+			if (Creature == null)
+				await TryLoadCreature();
+
+			if (Creature.Engagement > 0) 
+				Creature.Engagement -= engagementTickValue;
 
 			if (Creature.Engagement < 20 || Creature.Engagement > 80)
 			{
@@ -171,9 +247,13 @@ namespace Michaelotchi
 			}
 		}
 
-		public void LonelinessTick(object sender, System.Timers.ElapsedEventArgs e)
+		public async void LonelinessTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.Loneliness < 100) Creature.Loneliness += lonelinessTickValue;
+			if (Creature == null)
+				await TryLoadCreature();
+
+			if (Creature.Loneliness < 100) 
+				Creature.Loneliness += lonelinessTickValue;
 
 			if (Creature.Loneliness > 50)
 			{
@@ -182,9 +262,13 @@ namespace Michaelotchi
 			}
 		}
 
-		public void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
+		public async void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			if (Creature.Tired < 100) Creature.Tired = MathF.Min(Creature.Tired + energyTickValue, 100);
+			if (Creature == null)
+				await TryLoadCreature();
+
+			if (Creature.Tired < 100) 
+				Creature.Tired = MathF.Min(Creature.Tired + energyTickValue, 100);
 		}
 		#endregion
 		
@@ -195,17 +279,30 @@ namespace Michaelotchi
 
 		private void LoadHungerPage(object sender, EventArgs e)
 		{
+			HungerTick(null, null);
+			HungerTick(null, null);
+			HungerTick(null, null);
+			HungerTick(null, null);
+			HungerTick(null, null);
 			Navigation.PushAsync(new HungerPage(Creature));
 		}
 
 		private void LoadThirstPage(object sender, EventArgs e)
 		{
+			ThirstTick(null, null);
+			ThirstTick(null, null);
+			ThirstTick(null, null);
+			ThirstTick(null, null);
+			ThirstTick(null, null);
 			Navigation.PushAsync(new ThirstPage(Creature));
 		}
 
-		private void LoadEngagementPage(object sender, EventArgs e)
+		private async void LoadEngagementPage(object sender, EventArgs e)
 		{
-			Navigation.PushAsync(new EngagementPage(Creature));
+			if (Creature.Tired > 10)
+			{
+				await Navigation.PushAsync(new EngagementPage(Creature));
+			}
 		}
 
 		private async void Die()
@@ -235,6 +332,12 @@ namespace Michaelotchi
 			}
 
 			return true;
+		}
+
+		protected override async void OnAppearing()
+		{
+			await TryLoadCreature();
+			base.OnAppearing();
 		}
 
 		private void DoNothing(object sender, EventArgs e) { }

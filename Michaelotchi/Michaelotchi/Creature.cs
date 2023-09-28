@@ -13,12 +13,14 @@ namespace Michaelotchi
 		public string UserName { get; set; }
 		public float Hunger { get; set; } // perfect at 100, decreases slowly
 		public float Thirst { get; set; } // perfect at 100, decreases slowlý
-		private float engagement;
-		public float Engagement {
-			get => engagement;
+		public float Engagement
+		{
+			get
+			{
+				return Stimulated;
+			}
 			set 
 			{
-				engagement = value;
 				Boredom = 100 - value;
 				Stimulated = value;
 			} 

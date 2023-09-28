@@ -2,23 +2,30 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Michaelotchi.EngagementPage"
-             Title="EngagementPage">
+             Title="Play with Michael">
     <VerticalStackLayout>
         <Label 
-            Text="Play juffen with Michael?"
+            Text="&#10; Play juffen with Michael &#10;"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
 
-        <HorizontalStackLayout>
+        <Label 
+            Text="{Binding CountText, Mode=OneWay}"
+            VerticalOptions="Center" 
+            FontSize="32"
+            HorizontalOptions="Center" />
+    
+        <HorizontalStackLayout
+            HorizontalOptions="CenterAndExpand">
             <Button
                 x:Name="CounterButton"
-                Text="{Binding ButtonText, Mode=OneWay}"
+                Text="Click Here To Count"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Center" />
 
             <Button
                 x:Name="JufButton"
-                Text="{Binding ButtonText, Mode=OneWay}"
+                Text="Click Here To Juf"
                 Clicked="OnJufClicked"
                 HorizontalOptions="Center" />
         </HorizontalStackLayout>

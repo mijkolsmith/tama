@@ -25,6 +25,8 @@ namespace Michaelotchi
 
 		public NewCreaturePage()
 		{
+
+			BindingContext = this;
 			InitializeComponent();
 
 			creatureCount = Preferences.Get("creatureCount", 0);

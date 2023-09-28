@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Michaelotchi.ThirstPage"
-             Title="ThirstPage">
+             Title="Water the Creature">
     <VerticalStackLayout>
         <Label 
             Text="Give Michael some water?"
@@ -14,5 +14,11 @@
             Text="Give Creature Water"
             Clicked="WaterCreature"
             HorizontalOptions="CenterAndExpand" />
+
+        <Label
+            Text="{Binding NotificationText, Mode=OneWay}"
+            SemanticProperties.HeadingLevel="Level2"
+            FontSize="18"
+            HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>
