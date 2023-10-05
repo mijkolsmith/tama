@@ -21,7 +21,13 @@
                 HorizontalOptions="Center" />
 
             <Label
-                Text="The game where you tame a little Michael"
+                Text="{Binding DebugText, Mode=OneWay}"
+                SemanticProperties.HeadingLevel="Level2"
+                FontSize="18"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="{Binding SubTitle, Mode=OneWay}"
                 SemanticProperties.HeadingLevel="Level2"
                 FontSize="18"
                 HorizontalOptions="Center" />

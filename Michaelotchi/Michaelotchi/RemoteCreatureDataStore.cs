@@ -47,6 +47,8 @@ namespace Michaelotchi
 			string creatureString = JsonConvert.SerializeObject(item);
 			HttpResponseMessage response = await httpClient.DeleteAsync("https://tamagotchi.hku.nl/api/Creatures/" + item.Id);
 
+			Preferences.Set("creatureId", -1);
+
 			return response.IsSuccessStatusCode;
 		}
 	}

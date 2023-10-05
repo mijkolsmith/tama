@@ -3,6 +3,7 @@ namespace Michaelotchi;
 public partial class HungerPage : ContentPage
 {
 	Creature Creature { get; set; }
+	public string TitleText { get; set; }
 	public string NotificationText { get; set; }
 
 	public HungerPage(Creature creature)
@@ -11,6 +12,7 @@ public partial class HungerPage : ContentPage
 		InitializeComponent();
 
 		Creature = creature;
+		TitleText = $"Feed {Creature.Name}!";
 	}
 
 	public void FeedCreature(object sender, EventArgs e)
@@ -19,9 +21,9 @@ public partial class HungerPage : ContentPage
 		{
 			Creature.Hunger += 10;
 			Creature.Tired -= 5;
-			NotificationText = "Michael was fed!";
+			NotificationText = $"{Creature.Name} was fed!";
 		}
-		else NotificationText = "Michael is not hungry.";
+		else NotificationText = $"{Creature.Name} is not hungry.";
 	}
 
 	protected override async void OnDisappearing()

@@ -8,14 +8,16 @@ namespace Michaelotchi
 		private const float defaultLonelinessValue = 0f;
 		private const float defaultEnergyValue = 100f;
 
-		public string CreatureCountText { get => "What should your " + CreatureCount + "creature be called?"; }
+		public Creature Creature { get; set; }
+
+		public string CreatureCountText { get => "What should your " + CreatureCount + " creature be called?"; }
 		private int creatureCount = 0;
 		public string CreatureCount => creatureCount + creatureCount switch
 		{
 			1 => "st",
 			2 => "nd",
 			3 => "rd",
-			>= 4 => "th",
+			0 or >= 4 => "th",
 			_ => ""
 		};
 
@@ -23,9 +25,8 @@ namespace Michaelotchi
 		private string UserName { get; set; }
 		public string CreatureCreatedText { get; set; } = "";
 
-		public NewCreaturePage()
+		public NewCreaturePage(bool died)
 		{
-
 			BindingContext = this;
 			InitializeComponent();
 
@@ -44,24 +45,34 @@ namespace Michaelotchi
 
 		public async void NewCreature(object sender, EventArgs e)
 		{
-			creatureCount++;
-
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
 
-			if (await creatureDataStore.CreateItem(new Creature(
-					Name,
-					UserName,
-					defaultHungerValue,
-					defaultThirstValue,
-					defaultEngagementValue,
-					defaultLonelinessValue,
-					defaultEnergyValue,
-					creatureCount)))
+			int id = Preferences.Get("creatureId", -1);
+			if (id == -1)
 			{
-				int id = Preferences.Get("creatureId", 0);
-				CreatureCreatedText = $"Creature succesfully created with id: {id}";
+				creatureCount++;
+				Creature = new Creature(Name,
+										UserName,
+										defaultHungerValue,
+										defaultThirstValue,
+										defaultEngagementValue,
+										defaultLonelinessValue,
+										defaultEnergyValue,
+										creatureCount);
+
+
+				if (await creatureDataStore.CreateItem(Creature))
+				{
+					id = Preferences.Get("creatureId", -1);
+					CreatureCreatedText = $"Creature succesfully created with name: {Creature.Name}";
+				}
+				else CreatureCreatedText = "error occured";
 			}
-			else CreatureCreatedText = "error occured";
+			else
+			{
+				Creature = await creatureDataStore.ReadItem(Preferences.Get("creatureId", -1));
+				CreatureCreatedText = $"Creature {Creature.Name} already created";
+			}
 		}
 	}
 }

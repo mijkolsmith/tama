@@ -5,7 +5,7 @@
              Title="Play with Michael">
     <VerticalStackLayout>
         <Label 
-            Text="&#10; Play juffen with Michael &#10;"
+            Text="{Binding TitleText, Mode=OneWay}"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
 

@@ -3,13 +3,16 @@ namespace Michaelotchi;
 public partial class ThirstPage : ContentPage
 {
 	Creature Creature { get; set; }
+	public string TitleText { get; set; }
 	public string NotificationText { get; set; }
 
 	public ThirstPage(Creature creature)
 	{
+		BindingContext = this;
 		InitializeComponent();
 
 		Creature = creature;
+		TitleText = $"Give {Creature.Name} water!";
 	}
 
 	public void WaterCreature(object sender, EventArgs e)
@@ -18,9 +21,9 @@ public partial class ThirstPage : ContentPage
 		{
 			Creature.Thirst += 10;
 			Creature.Tired -= 5;
-			NotificationText = "Michael was given water!";
+			NotificationText = $"{Creature.Name} was given water!";
 		}
-		else NotificationText = "Michael is not thirsty.";
+		else NotificationText = $"{Creature.Name} is not thirsty.";
 	}
 
 	protected override async void OnDisappearing()

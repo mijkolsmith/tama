@@ -5,7 +5,7 @@
              Title="Water the Creature">
     <VerticalStackLayout>
         <Label 
-            Text="Give Michael some water?"
+            Text="{Binding TitleText, Mode=OneWay}"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
 

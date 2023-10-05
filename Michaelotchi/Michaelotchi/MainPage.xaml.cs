@@ -1,14 +1,22 @@
-﻿namespace Michaelotchi
+﻿using Microsoft.Maui;
+using System.Reflection.Metadata.Ecma335;
+
+namespace Michaelotchi
 {
 	public partial class MainPage : ContentPage
 	{
-		public string HeaderTitle { get; set; } = "Welcome to Michaelotchi";
 		public bool displayDebugStats = true;
-		public Creature Creature { get; set; }
 
-		public int hungerTickIntervalSeconds = 1200;
+		public string HeaderTitle { get; set; } = "Welcome to Michaelotchi";
+		public string SubTitle { get; set; } = "How's Michael doing?";
+		public string DebugText { get; set; }
+		public Creature Creature { get; set; }
+		private bool timersStarted = false;
+
+		public int hungerTickIntervalSeconds = 5;//1200;
 		public float hungerTickValue = 1;
-		public string HungerText => "Hunger: " + (displayDebugStats ? Creature?.Hunger : Creature?.Hunger switch
+		public string HungerText => "Hunger: " + 
+			(displayDebugStats ? Creature?.Hunger : Creature?.Hunger switch
 		{
 			>= 75 =>	"Not hungry",
 			>= 50 =>	"Could eat",
@@ -96,7 +104,7 @@
 			_ =>		Colors.White
 		};
 
-		public int energyTickIntervalSeconds = 500;
+		public int energyTickIntervalSeconds = 5; //500;
 		public float energyTickValue = 1;
 		public string EnergyText => "Energy: " + 
 			(displayDebugStats ? Creature?.Tired : Creature?.Tired switch
@@ -127,17 +135,37 @@
 			LoadCreatureAtStartup();
 		}
 
-		public async void LoadCreatureAtStartup()
+		private async void LoadCreatureAtStartup()
 		{
 			// Try and get the creature, if it's still alive
-			if (!await TryLoadCreature()) 
-				LoadNewCreaturePage();
+			(bool, bool) loadedCreature = await TryLoadCreature();
+
+			if (loadedCreature.Item1)
+				StartTimers();
+			else LoadNewCreaturePage(loadedCreature.Item2);
+		}
+
+		private void StartTimers()
+		{
+			if (timersStarted)
+				return;
+
+			timersStarted = true;
 
 			// Update creature according to elapsed time outside app
 			float elapsedSeconds = Preferences.Get("elapsedTime", 0);
-			if (elapsedSeconds != 0)
+			DebugText = "Elapsed Seconds: " + elapsedSeconds;
+			if (elapsedSeconds != -1)
 			{
-				for (int hungerTicks = (int)MathF.Floor(elapsedSeconds / hungerTickIntervalSeconds); hungerTicks > 0; hungerTicks--)
+				int hungerTicks = (int)MathF.Floor(elapsedSeconds / hungerTickIntervalSeconds);
+				DebugText += "\nHunger Ticks: " + hungerTicks;
+
+				DateTime sleepTime = Preferences.Get("sleepTime", DateTime.Now);
+				DateTime wakeTime = Preferences.Get("wakeTime", DateTime.Now);
+
+				DebugText += "\nSleep Time: " + sleepTime.Second;
+				DebugText += "\nWake Time: " + wakeTime.Second;
+				for (; hungerTicks > 0; hungerTicks--)
 					HungerTick(null, null);
 
 				for (int thirstTicks = (int)MathF.Floor(elapsedSeconds / thirstTickIntervalSeconds); thirstTicks > 0; thirstTicks--)
@@ -156,7 +184,7 @@
 			// Start the in-app timers
 			#region Start Timers
 			//Hunger timer
-			System.Timers.Timer hungerTimer = new System.Timers.Timer()
+			System.Timers.Timer hungerTimer = new()
 			{
 				Interval = hungerTickIntervalSeconds * 1000,
 				AutoReset = true
@@ -165,7 +193,7 @@
 			hungerTimer.Start();
 
 			//Thirst timer
-			System.Timers.Timer thirstTimer = new System.Timers.Timer()
+			System.Timers.Timer thirstTimer = new()
 			{
 				Interval = thirstTickIntervalSeconds * 1000,
 				AutoReset = true
@@ -174,30 +202,30 @@
 			thirstTimer.Start();
 
 			//Engagement timer
-			System.Timers.Timer engagementTimer = new System.Timers.Timer()
+			System.Timers.Timer engagementTimer = new()
 			{
 				Interval = engagementTickIntervalSeconds * 1000,
 				AutoReset = true
 			};
-			engagementTimer.Elapsed += ThirstTick;
+			engagementTimer.Elapsed += EngagementTick;
 			engagementTimer.Start();
 
 			//Loneliness timer
-			System.Timers.Timer lonelinessTimer = new System.Timers.Timer()
+			System.Timers.Timer lonelinessTimer = new()
 			{
 				Interval = lonelinessTickIntervalSeconds * 1000,
 				AutoReset = true
 			};
-			lonelinessTimer.Elapsed += ThirstTick;
+			lonelinessTimer.Elapsed += LonelinessTick;
 			lonelinessTimer.Start();
 
 			//Energy timer
-			System.Timers.Timer energyTimer = new System.Timers.Timer()
+			System.Timers.Timer energyTimer = new()
 			{
 				Interval = energyTickIntervalSeconds * 1000,
 				AutoReset = true
 			};
-			energyTimer.Elapsed += ThirstTick;
+			energyTimer.Elapsed += EnergyTick;
 			energyTimer.Start();
 			#endregion
 		}
@@ -222,7 +250,7 @@
 			if (Creature == null)
 				await TryLoadCreature();
 
-			if (Creature.Thirst > 0) 
+			if (Creature.Thirst > 0)
 				Creature.Thirst -= thirstTickValue;
 			
 			thirstTickValue = 1;
@@ -272,28 +300,18 @@
 		}
 		#endregion
 		
-		private void LoadNewCreaturePage()
+		private void LoadNewCreaturePage(bool died)
 		{
-			Navigation.PushAsync(new NewCreaturePage());
+			Navigation.PushAsync(new NewCreaturePage(died));
 		}
 
 		private void LoadHungerPage(object sender, EventArgs e)
 		{
-			HungerTick(null, null);
-			HungerTick(null, null);
-			HungerTick(null, null);
-			HungerTick(null, null);
-			HungerTick(null, null);
 			Navigation.PushAsync(new HungerPage(Creature));
 		}
 
 		private void LoadThirstPage(object sender, EventArgs e)
 		{
-			ThirstTick(null, null);
-			ThirstTick(null, null);
-			ThirstTick(null, null);
-			ThirstTick(null, null);
-			ThirstTick(null, null);
 			Navigation.PushAsync(new ThirstPage(Creature));
 		}
 
@@ -307,37 +325,64 @@
 
 		private async void Die()
 		{
+			if (Preferences.Get("creatureId", -1) == -1)
+				return;
+
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
 			await creatureDataStore.DeleteItem(Creature);
-			await Navigation.PushAsync(new NewCreaturePage());
+
+			LoadNewCreaturePage(true);
 		}
 
-		private async Task<bool> TryLoadCreature() 
+		private async Task<(bool, bool)> TryLoadCreature() 
 		{
 			//Preferences.Clear();
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-			int creatureId = Preferences.Get("creatureId", 0);
+			int creatureId = Preferences.Get("creatureId", -1);
 
-			if (creatureId == 0)
+			if (creatureId == -1)
 			{
-				return false;
+				return (false, false);
 			}
 			else
 			{
 				Creature = await creatureDataStore.ReadItem(creatureId);
 				if (Creature == null)
 				{
-					return false;
+					return (false, false);
+				}
+				if (!CreatureIsAlive())
+				{
+					LoadNewCreaturePage(true);
+					return (false, true);
 				}
 			}
 
-			return true;
+			SubTitle = Creature.Name + " is happy to see you!";
+			return (true, false);
+		}
+
+		private bool CreatureIsAlive()
+		{
+			return Creature.Hunger > 0 && Creature.Thirst > 0;
 		}
 
 		protected override async void OnAppearing()
 		{
 			await TryLoadCreature();
+			StartTimers();
+
+			SubTitle = Creature.Name + " is happy to see you!";
+
 			base.OnAppearing();
+		}
+
+		protected override async void OnDisappearing()
+		{
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			await creatureDataStore.UpdateItem(Creature);
+
+			base.OnDisappearing();
 		}
 
 		private void DoNothing(object sender, EventArgs e) { }

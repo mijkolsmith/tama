@@ -15,6 +15,19 @@
             MainPage = new AppShell();
 		}
 
+		protected override void OnStart()
+		{
+			wakeTime = DateTime.Now;
+			sleepTime = Preferences.Get(nameof(sleepTime), wakeTime);
+
+			elapsedTime = wakeTime - sleepTime;
+
+			Preferences.Set("wakeTime", wakeTime);
+
+			Preferences.Set("elapsedTime", elapsedTime.Seconds);
+			base.OnStart();
+		}
+
 		protected override void OnSleep()
 		{
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
@@ -31,6 +44,8 @@
 			sleepTime = Preferences.Get(nameof(sleepTime), wakeTime);
 
 			elapsedTime = wakeTime - sleepTime;
+
+			Preferences.Set("wakeTime", wakeTime);
 
 			Preferences.Set("elapsedTime", elapsedTime.Seconds);
 

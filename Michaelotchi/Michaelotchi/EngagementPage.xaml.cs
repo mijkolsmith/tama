@@ -2,6 +2,7 @@ namespace Michaelotchi;
 
 public partial class EngagementPage : ContentPage
 {
+	public string TitleText { get; set; } = "\n \n";
 	public string CountText { get; set; } = "\n";
 	int count;
 	Creature Creature { get; set; }
@@ -11,7 +12,9 @@ public partial class EngagementPage : ContentPage
 		BindingContext = this;
 
 		InitializeComponent();
+
 		Creature = creature;
+		TitleText = $"\n Play juffen with {Creature.Name}! \n";
 	}
 
 	public void OnCounterClicked(object sender, EventArgs e)
@@ -31,7 +34,7 @@ public partial class EngagementPage : ContentPage
 		{
 			if (Creature.Tired > 10)
 			{
-				CountText = "Juf! Michael liked that. \n";
+				CountText = $"Juf! {Creature.Name} liked that. \n";
 				Creature.Engagement += 1;
 
 				IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
