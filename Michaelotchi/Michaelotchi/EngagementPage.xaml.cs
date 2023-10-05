@@ -14,7 +14,7 @@ public partial class EngagementPage : ContentPage
 		InitializeComponent();
 
 		Creature = creature;
-		TitleText = $"\n Play juffen with {Creature.Name}! \n";
+		TitleText = $"\n Play juffen with {Creature.Name}! \n Press the juf button every time a 7 will occur in the next number.";
 	}
 
 	public void OnCounterClicked(object sender, EventArgs e)
@@ -35,10 +35,7 @@ public partial class EngagementPage : ContentPage
 			if (Creature.Tired > 10)
 			{
 				CountText = $"Juf! {Creature.Name} liked that. \n";
-				Creature.Engagement += 1;
-
-				IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-				creatureDataStore.UpdateItem(Creature);
+				Creature.Engagement += 2;
 			}
 			else CountText = "Juf!";
 		}
@@ -60,13 +57,9 @@ public partial class EngagementPage : ContentPage
 		if (Creature.Tired > 0)
 		{
 			Creature.Tired -= 5;
-
-			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-			creatureDataStore.UpdateItem(Creature);
 		}
 
-		CountText = "WRONG! \n";
+		CountText = $"WRONG! {Creature.UserName} is clearly a bad pet owner. \n";
 		count = 0;
-
 	}
 }

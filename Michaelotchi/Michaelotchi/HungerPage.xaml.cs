@@ -25,12 +25,4 @@ public partial class HungerPage : ContentPage
 		}
 		else NotificationText = $"{Creature.Name} is not hungry.";
 	}
-
-	protected override async void OnDisappearing()
-	{
-		IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-		await creatureDataStore.UpdateItem(Creature);
-
-		base.OnDisappearing();
-	}
 }

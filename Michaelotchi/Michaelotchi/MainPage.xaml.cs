@@ -5,7 +5,7 @@ namespace Michaelotchi
 {
 	public partial class MainPage : ContentPage
 	{
-		public bool displayDebugStats = true;
+		public bool displayDebugInfo = true;
 
 		public string HeaderTitle { get; set; } = "Welcome to Michaelotchi";
 		public string SubTitle { get; set; } = "How's Michael doing?";
@@ -13,18 +13,19 @@ namespace Michaelotchi
 		public Creature Creature { get; set; }
 		private bool timersStarted = false;
 
-		public int hungerTickIntervalSeconds = 5;//1200;
+		public int hungerTickIntervalSeconds = 5; //1200;
 		public float hungerTickValue = 1;
-		public string HungerText => "Hunger: " + 
-			(displayDebugStats ? Creature?.Hunger : Creature?.Hunger switch
-		{
-			>= 75 =>	"Not hungry",
-			>= 50 =>	"Could eat",
-			>= 25 =>	"Hungry",
-			>= 10 =>	"Extremely hungry",
-			>= 0 =>		"Dying of hunger",
-			_ =>		""
-		});
+		public string HungerText => "Hunger: " +
+			(displayDebugInfo ? Creature?.Hunger : Creature?.Hunger switch
+			{
+				>= 75 => "Not hungry",
+				>= 50 => "Could eat",
+				>= 25 => "Hungry",
+				>= 10 => "Extremely hungry",
+				>= 0 => "Dying of hunger",
+				_ => ""
+			});
+
 		public Color HungerColor => Creature?.Hunger switch
 		{
 			>= 75 =>	Colors.Green,
@@ -37,16 +38,16 @@ namespace Michaelotchi
 
 		public int thirstTickIntervalSeconds = 1000;
 		public float thirstTickValue = 1;
-		public string ThirstText => "Thirst: " + 
-			(displayDebugStats ? Creature?.Thirst : Creature?.Thirst switch
-		{
-			>= 75 =>	"Not thirsty",
-			>= 50 =>	"Could drink",
-			>= 25 =>	"Thirsty",
-			>= 10 =>	"Extremely thirsty",
-			>= 0 =>		"Dying of thirst",
-			_ =>		""
-		});
+		public string ThirstText => "Thirst: " +
+			(displayDebugInfo ? Creature?.Thirst : Creature?.Thirst switch
+			{
+				>= 75 => "Not thirsty",
+				>= 50 => "Could drink",
+				>= 25 => "Thirsty",
+				>= 10 => "Extremely thirsty",
+				>= 0 => "Dying of thirst",
+				_ => ""
+			});
 		public Color ThirstColor => Creature?.Thirst switch
 		{
 			>= 75 =>	Colors.Green,
@@ -59,17 +60,17 @@ namespace Michaelotchi
 
 		public int engagementTickIntervalSeconds = 2500;
 		public float engagementTickValue = 1;
-		public string EngagementText => "Happiness: " + 
-			(displayDebugStats ? Creature?.Engagement : Creature?.Engagement switch
-		{
-			>= 90 =>	"Overstimulated",
-			>= 75 =>	"Extremely happy",
-			>= 50 =>	"Happy",
-			>= 25 =>	"Bored",
-			>= 10 =>	"Extremely bored",
-			>= 0 =>		"Bored to death",
-			_ =>		""
-		});
+		public string EngagementText => "Happiness: " +
+			(displayDebugInfo ? Creature?.Engagement : Creature?.Engagement switch
+			{
+				>= 90 => "Overstimulated",
+				>= 75 => "Extremely happy",
+				>= 50 => "Happy",
+				>= 25 => "Bored",
+				>= 10 => "Extremely bored",
+				>= 0 => "Bored to death",
+				_ => ""
+			});
 		public Color EngagementColor => Creature?.Engagement switch
 		{
 			>= 90 =>	Colors.Red,
@@ -84,16 +85,16 @@ namespace Michaelotchi
 
 		public int lonelinessTickIntervalSeconds = 1500;
 		public float lonelinessTickValue = 1;
-		public string LonelinessText => "Loneliness: " + 
-			(displayDebugStats ? Creature?.Loneliness : Creature?.Loneliness switch
-		{
-			>= 90 =>	"Feeling abandoned",
-			>= 75 =>	"Extremely lonely",
-			>= 50 =>	"Lonely",
-			>= 25 =>	"Happy",
-			>= 0 =>		"Loved",
-			_ =>		""
-		});
+		public string LonelinessText => "Loneliness: " +
+			(displayDebugInfo ? Creature?.Loneliness : Creature?.Loneliness switch
+			{
+				>= 90 => "Feeling abandoned",
+				>= 75 => "Extremely lonely",
+				>= 50 => "Lonely",
+				>= 25 => "Happy",
+				>= 0 => "Loved",
+				_ => ""
+			});
 		public Color LonelinessColor => Creature?.Loneliness switch
 		{
 			>= 90 =>	Colors.Red,
@@ -106,16 +107,16 @@ namespace Michaelotchi
 
 		public int energyTickIntervalSeconds = 5; //500;
 		public float energyTickValue = 1;
-		public string EnergyText => "Energy: " + 
-			(displayDebugStats ? Creature?.Tired : Creature?.Tired switch
-		{
-			>= 75 =>	"Energized",
-			>= 50 =>	"Rested",
-			>= 25 =>	"Tired",
-			>= 10 =>	"Extremely tired",
-			>= 0 =>		"Sleeping",
-			_ =>		""
-		});
+		public string EnergyText => "Energy: " +
+			(displayDebugInfo ? Creature?.Tired : Creature?.Tired switch
+			{
+				>= 75 => "Energized",
+				>= 50 => "Rested",
+				>= 25 => "Tired",
+				>= 10 => "Extremely tired",
+				>= 0 => "Sleeping",
+				_ => ""
+			});
 		public Color EnergyColor => Creature?.Tired switch
 		{
 			>= 75 => Colors.Green,
@@ -154,17 +155,22 @@ namespace Michaelotchi
 
 			// Update creature according to elapsed time outside app
 			float elapsedSeconds = Preferences.Get("elapsedTime", 0);
-			DebugText = "Elapsed Seconds: " + elapsedSeconds;
+			if (displayDebugInfo) DebugText = "Elapsed Seconds: " + elapsedSeconds;
 			if (elapsedSeconds != -1)
 			{
 				int hungerTicks = (int)MathF.Floor(elapsedSeconds / hungerTickIntervalSeconds);
-				DebugText += "\nHunger Ticks: " + hungerTicks;
 
-				DateTime sleepTime = Preferences.Get("sleepTime", DateTime.Now);
-				DateTime wakeTime = Preferences.Get("wakeTime", DateTime.Now);
+				if (displayDebugInfo)
+				{
+					DateTime sleepTime = Preferences.Get("sleepTime", DateTime.Now);
+					DateTime wakeTime = Preferences.Get("wakeTime", DateTime.Now);
+					DebugText +=
+						$"\nHunger Before:{Creature.Hunger} " +
+						$"\n Hunger Ticks: {hungerTicks}" +
+						$"\nSleep Time: {sleepTime.Minute}:{sleepTime.Second}" +
+						$"\nWake Time: {wakeTime.Minute}:{wakeTime.Second}";
+				}
 
-				DebugText += "\nSleep Time: " + sleepTime.Second;
-				DebugText += "\nWake Time: " + wakeTime.Second;
 				for (; hungerTicks > 0; hungerTicks--)
 					HungerTick(null, null);
 
@@ -179,6 +185,11 @@ namespace Michaelotchi
 
 				for (int energyTicks = (int)MathF.Floor(elapsedSeconds / energyTickIntervalSeconds); energyTicks > 0; energyTicks--)
 					EnergyTick(null, null);
+
+				if (displayDebugInfo)
+				{
+					DebugText += $"\nHunger After:{Creature.Hunger}";
+				}
 			}
 
 			// Start the in-app timers
@@ -236,9 +247,12 @@ namespace Michaelotchi
 			if (Creature == null)
 				await TryLoadCreature();
 
-			if (Creature.Hunger > 0) 
+			if (Creature.Hunger > 0)
+			{
 				Creature.Hunger -= hungerTickValue;
-			
+				OnPropertyChanged(nameof(HungerText));
+			}
+
 			hungerTickValue = 1;
 
 			if (Creature.Hunger <= 0)
@@ -251,7 +265,10 @@ namespace Michaelotchi
 				await TryLoadCreature();
 
 			if (Creature.Thirst > 0)
+			{
 				Creature.Thirst -= thirstTickValue;
+				OnPropertyChanged(nameof(ThirstTick));
+			}
 			
 			thirstTickValue = 1;
 
@@ -264,8 +281,11 @@ namespace Michaelotchi
 			if (Creature == null)
 				await TryLoadCreature();
 
-			if (Creature.Engagement > 0) 
+			if (Creature.Engagement > 0)
+			{
 				Creature.Engagement -= engagementTickValue;
+				OnPropertyChanged(nameof(EngagementTick));
+			}
 
 			if (Creature.Engagement < 20 || Creature.Engagement > 80)
 			{
@@ -280,8 +300,11 @@ namespace Michaelotchi
 			if (Creature == null)
 				await TryLoadCreature();
 
-			if (Creature.Loneliness < 100) 
+			if (Creature.Loneliness < 100)
+			{
 				Creature.Loneliness += lonelinessTickValue;
+				OnPropertyChanged(nameof(LonelinessTick));
+			}
 
 			if (Creature.Loneliness > 50)
 			{
@@ -295,8 +318,11 @@ namespace Michaelotchi
 			if (Creature == null)
 				await TryLoadCreature();
 
-			if (Creature.Tired < 100) 
+			if (Creature.Tired < 100)
+			{
 				Creature.Tired = MathF.Min(Creature.Tired + energyTickValue, 100);
+				OnPropertyChanged(nameof(EnergyText));
+			}
 		}
 		#endregion
 		
@@ -375,14 +401,6 @@ namespace Michaelotchi
 			SubTitle = Creature.Name + " is happy to see you!";
 
 			base.OnAppearing();
-		}
-
-		protected override async void OnDisappearing()
-		{
-			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-			await creatureDataStore.UpdateItem(Creature);
-
-			base.OnDisappearing();
 		}
 
 		private void DoNothing(object sender, EventArgs e) { }

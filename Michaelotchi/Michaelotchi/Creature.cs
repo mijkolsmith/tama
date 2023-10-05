@@ -11,9 +11,30 @@ namespace Michaelotchi
 		public int Id { get; set; }
 		public string Name {  get; set; }
 		public string UserName { get; set; }
-		public float Hunger { get; set; } // perfect at 100, decreases slowly
-		public float Thirst { get; set; } // perfect at 100, decreases slowlý
-		public float Engagement
+
+		private float hungerValue;
+		public float Hunger // perfect at 100, decreases slowly
+		{
+			get => hungerValue;
+			set
+			{
+				hungerValue = value;
+				UpdateCreature();
+			}
+		}
+
+		private float thirstValue;
+		public float Thirst // perfect at 100, decreases slowly
+		{
+			get => thirstValue;
+			set
+			{
+				thirstValue = value;
+				UpdateCreature();
+			}
+		}
+
+		public float Engagement // perfect at 50, decreases very slowly
 		{
 			get
 			{
@@ -24,11 +45,52 @@ namespace Michaelotchi
 				Boredom = 100 - value;
 				Stimulated = value;
 			} 
-		} // perfect at 50, decreases very slowly
-		public float Boredom { get; set; } // perfect at 50, increases very slowly according to engagement
-		public float Stimulated { get; set; } // perfect at 50, decreases very slowly according to engagement
-		public float Loneliness { get; set; } // perfect at 0, increases very slowly
-		public float Tired { get; set; } // perfect at 100, increases slowly
+		}
+		
+		private float boredomValue;
+		public float Boredom // perfect at 50, increases very slowly according to engagement
+		{
+			get => boredomValue;
+			set
+			{
+				boredomValue = value;
+				UpdateCreature();
+			}
+		}
+
+		private float stimulatedValue;
+		public float Stimulated // perfect at 50, decreases very slowly according to engagement
+		{ 
+			get => stimulatedValue;
+			set
+			{
+				stimulatedValue = value;
+				UpdateCreature();
+			}
+		}
+
+		private float lonelinessValue;
+		public float Loneliness // perfect at 0, increases very slowly
+		{
+			get => lonelinessValue;
+			set
+			{
+				lonelinessValue = value;
+				UpdateCreature();
+			}
+		}
+
+		private float tiredValue;
+		public float Tired // perfect at 100, increases slowly
+		{ 
+			get => tiredValue; 
+			set
+			{
+				tiredValue = value; 
+				UpdateCreature();
+			}
+		}
+
 		public int creatureCount;
 
 		public Creature(string name, 
@@ -48,6 +110,12 @@ namespace Michaelotchi
 			Loneliness = lonelinessValue;
 			Tired = energyValue;
 			this.creatureCount = creatureCount;
+		}
+
+		public async Task<bool> UpdateCreature()
+		{
+			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+			return await creatureDataStore.UpdateItem(this);
 		}
 	}
 }
