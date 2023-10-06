@@ -72,7 +72,15 @@
                 Clicked="DoNothing"
                 WidthRequest="400"
                 HorizontalOptions="CenterAndExpand" />
-            
+
+
+            <Button
+                x:Name="DieButton"
+                Text="Kill Creature"
+                BackgroundColor="DarkRed"
+                Clicked="KillCreature"
+                WidthRequest="400"
+                HorizontalOptions="CenterAndExpand" />
         </VerticalStackLayout>
     </ScrollView>
 

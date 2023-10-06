@@ -19,7 +19,6 @@ namespace Michaelotchi
 			set
 			{
 				hungerValue = value;
-				UpdateCreature();
 			}
 		}
 
@@ -44,6 +43,7 @@ namespace Michaelotchi
 			{
 				Boredom = 100 - value;
 				Stimulated = value;
+				UpdateCreature();
 			} 
 		}
 		
@@ -51,22 +51,14 @@ namespace Michaelotchi
 		public float Boredom // perfect at 50, increases very slowly according to engagement
 		{
 			get => boredomValue;
-			set
-			{
-				boredomValue = value;
-				UpdateCreature();
-			}
+			set => boredomValue = value;
 		}
 
 		private float stimulatedValue;
 		public float Stimulated // perfect at 50, decreases very slowly according to engagement
 		{ 
 			get => stimulatedValue;
-			set
-			{
-				stimulatedValue = value;
-				UpdateCreature();
-			}
+			set => stimulatedValue = value;
 		}
 
 		private float lonelinessValue;

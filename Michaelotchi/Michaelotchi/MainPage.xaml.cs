@@ -1,11 +1,8 @@
-﻿using Microsoft.Maui;
-using System.Reflection.Metadata.Ecma335;
-
-namespace Michaelotchi
+﻿namespace Michaelotchi
 {
 	public partial class MainPage : ContentPage
 	{
-		public bool displayDebugInfo = true;
+		public bool displayDebugInfo = false;
 
 		public string HeaderTitle { get; set; } = "Welcome to Michaelotchi";
 		public string SubTitle { get; set; } = "How's Michael doing?";
@@ -13,7 +10,7 @@ namespace Michaelotchi
 		public Creature Creature { get; set; }
 		private bool timersStarted = false;
 
-		public int hungerTickIntervalSeconds = 5; //1200;
+		public int hungerTickIntervalSeconds = 4; //1200;
 		public float hungerTickValue = 1;
 		public string HungerText => "Hunger: " +
 			(displayDebugInfo ? Creature?.Hunger : Creature?.Hunger switch
@@ -25,7 +22,6 @@ namespace Michaelotchi
 				>= 0 => "Dying of hunger",
 				_ => ""
 			});
-
 		public Color HungerColor => Creature?.Hunger switch
 		{
 			>= 75 =>	Colors.Green,
@@ -83,7 +79,8 @@ namespace Michaelotchi
 			_ =>		Colors.White
 		};
 
-		public int lonelinessTickIntervalSeconds = 1500;
+		public int lonelinessTickIntervalSecondsClosed = 1500;
+		public int lonelinessTickIntervalSecondsOpened = 20;
 		public float lonelinessTickValue = 1;
 		public string LonelinessText => "Loneliness: " +
 			(displayDebugInfo ? Creature?.Loneliness : Creature?.Loneliness switch
@@ -105,7 +102,7 @@ namespace Michaelotchi
 			_ =>		Colors.White
 		};
 
-		public int energyTickIntervalSeconds = 5; //500;
+		public int energyTickIntervalSeconds = 2; //500;
 		public float energyTickValue = 1;
 		public string EnergyText => "Energy: " +
 			(displayDebugInfo ? Creature?.Tired : Creature?.Tired switch
@@ -139,23 +136,23 @@ namespace Michaelotchi
 		private async void LoadCreatureAtStartup()
 		{
 			// Try and get the creature, if it's still alive
-			(bool, bool) loadedCreature = await TryLoadCreature();
+			bool loadedCreature = await TryLoadCreature();
 
-			if (loadedCreature.Item1)
-				StartTimers();
-			else LoadNewCreaturePage(loadedCreature.Item2);
+			if (loadedCreature)
+				await StartTimers();
+			else Respawn();
 		}
 
-		private void StartTimers()
+		private async Task<bool> StartTimers()
 		{
 			if (timersStarted)
-				return;
+				return false;
 
 			timersStarted = true;
 
 			// Update creature according to elapsed time outside app
 			float elapsedSeconds = Preferences.Get("elapsedTime", 0);
-			if (displayDebugInfo) DebugText = "Elapsed Seconds: " + elapsedSeconds;
+
 			if (elapsedSeconds != -1)
 			{
 				int hungerTicks = (int)MathF.Floor(elapsedSeconds / hungerTickIntervalSeconds);
@@ -165,31 +162,36 @@ namespace Michaelotchi
 					DateTime sleepTime = Preferences.Get("sleepTime", DateTime.Now);
 					DateTime wakeTime = Preferences.Get("wakeTime", DateTime.Now);
 					DebugText +=
-						$"\nHunger Before:{Creature.Hunger} " +
+						$"Elapsed Seconds: {elapsedSeconds}" +
+						$"\nHunger Before: {Creature.Hunger} " +
 						$"\n Hunger Ticks: {hungerTicks}" +
 						$"\nSleep Time: {sleepTime.Minute}:{sleepTime.Second}" +
 						$"\nWake Time: {wakeTime.Minute}:{wakeTime.Second}";
 				}
 
-				for (; hungerTicks > 0; hungerTicks--)
-					HungerTick(null, null);
-
-				for (int thirstTicks = (int)MathF.Floor(elapsedSeconds / thirstTickIntervalSeconds); thirstTicks > 0; thirstTicks--)
-					ThirstTick(null, null);
-
-				for (int engagementTicks = (int)MathF.Floor(elapsedSeconds / engagementTickIntervalSeconds); engagementTicks > 0; engagementTicks--)
-					EngagementTick(null, null);
-
-				for (int lonelinessTicks = (int)MathF.Floor(elapsedSeconds / lonelinessTickIntervalSeconds); lonelinessTicks > 0; lonelinessTicks--)
-					LonelinessTick(null, null);
-
-				for (int energyTicks = (int)MathF.Floor(elapsedSeconds / energyTickIntervalSeconds); energyTicks > 0; energyTicks--)
-					EnergyTick(null, null);
+				hungerTickValue *= hungerTicks;
+				HungerTick(null, null);
 
 				if (displayDebugInfo)
 				{
-					DebugText += $"\nHunger After:{Creature.Hunger}";
+					DebugText += $"\nHunger After: {Creature.Hunger}";
 				}
+
+				int thirstTicks = (int)MathF.Floor(elapsedSeconds / thirstTickIntervalSeconds);
+				thirstTickValue *= thirstTicks;
+				ThirstTick(null, null);
+
+				int engagementTicks = (int)MathF.Floor(elapsedSeconds / engagementTickIntervalSeconds);
+				engagementTickValue *= engagementTicks;
+				EngagementTick(null, null);
+
+				int lonelinessTicks = (int)MathF.Floor(elapsedSeconds / lonelinessTickIntervalSecondsClosed);
+				lonelinessTickValue *= lonelinessTicks;
+				LonelinessTickUp();
+
+				int energyTicks = (int)MathF.Floor(elapsedSeconds / energyTickIntervalSeconds);
+				energyTickValue *= energyTicks;
+				EnergyTick(null, null);
 			}
 
 			// Start the in-app timers
@@ -221,13 +223,13 @@ namespace Michaelotchi
 			engagementTimer.Elapsed += EngagementTick;
 			engagementTimer.Start();
 
-			//Loneliness timer
+			//Loneliness timer (reversed compared to when app is closed)
 			System.Timers.Timer lonelinessTimer = new()
 			{
-				Interval = lonelinessTickIntervalSeconds * 1000,
+				Interval = lonelinessTickIntervalSecondsOpened * 1000,
 				AutoReset = true
 			};
-			lonelinessTimer.Elapsed += LonelinessTick;
+			lonelinessTimer.Elapsed += LonelinessTickDown;
 			lonelinessTimer.Start();
 
 			//Energy timer
@@ -239,10 +241,12 @@ namespace Michaelotchi
 			energyTimer.Elapsed += EnergyTick;
 			energyTimer.Start();
 			#endregion
+
+			return true;
 		}
 
 		#region Tick Methods
-		public async void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
+		private async void HungerTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			if (Creature == null)
 				await TryLoadCreature();
@@ -251,15 +255,16 @@ namespace Michaelotchi
 			{
 				Creature.Hunger -= hungerTickValue;
 				OnPropertyChanged(nameof(HungerText));
+				OnPropertyChanged(nameof(HungerColor));
 			}
 
 			hungerTickValue = 1;
 
 			if (Creature.Hunger <= 0)
-				Die();
+				Respawn();
 		}
 
-		public async void ThirstTick(object sender, System.Timers.ElapsedEventArgs e)
+		private async void ThirstTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			if (Creature == null)
 				await TryLoadCreature();
@@ -267,25 +272,29 @@ namespace Michaelotchi
 			if (Creature.Thirst > 0)
 			{
 				Creature.Thirst -= thirstTickValue;
-				OnPropertyChanged(nameof(ThirstTick));
+				OnPropertyChanged(nameof(ThirstText));
+				OnPropertyChanged(nameof(ThirstColor));
 			}
 			
 			thirstTickValue = 1;
 
 			if (Creature.Thirst <= 0)
-				Die();
+				Respawn();
 		}
 
-		public async void EngagementTick(object sender, System.Timers.ElapsedEventArgs e)
+		private async void EngagementTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			if (Creature == null)
 				await TryLoadCreature();
 
 			if (Creature.Engagement > 0)
 			{
-				Creature.Engagement -= engagementTickValue;
-				OnPropertyChanged(nameof(EngagementTick));
+				Creature.Engagement = MathF.Max(Creature.Engagement - engagementTickValue, 0);
+				OnPropertyChanged(nameof(EngagementText));
+				OnPropertyChanged(nameof(EngagementColor));
 			}
+
+			engagementTickValue = 1;
 
 			if (Creature.Engagement < 20 || Creature.Engagement > 80)
 			{
@@ -295,15 +304,37 @@ namespace Michaelotchi
 			}
 		}
 
-		public async void LonelinessTick(object sender, System.Timers.ElapsedEventArgs e)
+		private async void LonelinessTickUp()
 		{
 			if (Creature == null)
 				await TryLoadCreature();
 
 			if (Creature.Loneliness < 100)
 			{
-				Creature.Loneliness += lonelinessTickValue;
-				OnPropertyChanged(nameof(LonelinessTick));
+				Creature.Loneliness = MathF.Min(Creature.Loneliness + lonelinessTickValue, 100);
+				OnPropertyChanged(nameof(LonelinessText));
+				OnPropertyChanged(nameof(LonelinessColor));
+			}
+
+			lonelinessTickValue = 1;
+
+			if (Creature.Loneliness > 50)
+			{
+				thirstTickValue *= 2f;
+				hungerTickValue *= 2f;
+			}
+		}
+
+		private async void LonelinessTickDown(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			if (Creature == null)
+				await TryLoadCreature();
+
+			if (Creature.Loneliness > 100)
+			{
+				Creature.Loneliness = MathF.Max(Creature.Loneliness - lonelinessTickValue, 0);
+				OnPropertyChanged(nameof(LonelinessText));
+				OnPropertyChanged(nameof(LonelinessColor));
 			}
 
 			if (Creature.Loneliness > 50)
@@ -313,7 +344,7 @@ namespace Michaelotchi
 			}
 		}
 
-		public async void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
+		private async void EnergyTick(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			if (Creature == null)
 				await TryLoadCreature();
@@ -322,24 +353,21 @@ namespace Michaelotchi
 			{
 				Creature.Tired = MathF.Min(Creature.Tired + energyTickValue, 100);
 				OnPropertyChanged(nameof(EnergyText));
+				OnPropertyChanged(nameof(EnergyColor));
 			}
+
+			energyTickValue = 1;
 		}
 		#endregion
-		
-		private void LoadNewCreaturePage(bool died)
-		{
-			Navigation.PushAsync(new NewCreaturePage(died));
-		}
 
-		private void LoadHungerPage(object sender, EventArgs e)
-		{
+		private void LoadNewCreaturePage() =>
+			Navigation.PushAsync(new NewCreaturePage());
+
+		private void LoadHungerPage(object sender, EventArgs e) =>
 			Navigation.PushAsync(new HungerPage(Creature));
-		}
 
-		private void LoadThirstPage(object sender, EventArgs e)
-		{
+		private void LoadThirstPage(object sender, EventArgs e) =>
 			Navigation.PushAsync(new ThirstPage(Creature));
-		}
 
 		private async void LoadEngagementPage(object sender, EventArgs e)
 		{
@@ -349,18 +377,20 @@ namespace Michaelotchi
 			}
 		}
 
-		private async void Die()
+		private void KillCreature(object sender, EventArgs e) => Respawn();
+
+		private async void Respawn()
 		{
-			if (Preferences.Get("creatureId", -1) == -1)
-				return;
+			if (Creature != null)
+			{
+				IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
+				await creatureDataStore.DeleteItem(Creature);
+			}
 
-			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
-			await creatureDataStore.DeleteItem(Creature);
-
-			LoadNewCreaturePage(true);
+			LoadNewCreaturePage();
 		}
 
-		private async Task<(bool, bool)> TryLoadCreature() 
+		private async Task<bool> TryLoadCreature() 
 		{
 			//Preferences.Clear();
 			IDataStore<Creature> creatureDataStore = DependencyService.Get<IDataStore<Creature>>();
@@ -368,29 +398,19 @@ namespace Michaelotchi
 
 			if (creatureId == -1)
 			{
-				return (false, false);
+				return false;
 			}
 			else
 			{
 				Creature = await creatureDataStore.ReadItem(creatureId);
 				if (Creature == null)
 				{
-					return (false, false);
-				}
-				if (!CreatureIsAlive())
-				{
-					LoadNewCreaturePage(true);
-					return (false, true);
+					return false;
 				}
 			}
 
 			SubTitle = Creature.Name + " is happy to see you!";
-			return (true, false);
-		}
-
-		private bool CreatureIsAlive()
-		{
-			return Creature.Hunger > 0 && Creature.Thirst > 0;
+			return true;
 		}
 
 		protected override async void OnAppearing()

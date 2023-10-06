@@ -25,7 +25,7 @@ namespace Michaelotchi
 		private string UserName { get; set; }
 		public string CreatureCreatedText { get; set; } = "";
 
-		public NewCreaturePage(bool died)
+		public NewCreaturePage()
 		{
 			BindingContext = this;
 			InitializeComponent();
